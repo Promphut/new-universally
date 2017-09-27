@@ -2,14 +2,9 @@
 
 exports[`<AboutRoute /> renders 1`] = `
 <div
-  style={
-    Object {
-      "textAlign": "center",
-    }
-  }
+  classNames="aboutWrapper"
 >
   <HelmetWrapper
-    defer={true}
     encodeSpecialCharacters={true}
   >
     <title>

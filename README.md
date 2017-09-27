@@ -1,3 +1,9 @@
+### Feature Branch
+
+Note: This is a feature branch of `react-universally`. Please see the [`FEATURE_POSTCSS_SASS.md`](/docs/FEATURE_POSTCSS_SASS.md) doc for more information on this branch.
+
+---
+
 <p align='center'>
   <h1 align='center'>React, Universally</h1>
   <p align='center'><img width='150' src='https://raw.githubusercontent.com/ctrlplusb/assets/master/logos/react-universally.png' /></p>
@@ -41,6 +47,15 @@ Redux/MobX, data persistence, modern styling frameworks and all the other bells 
 > However, we now include a set of "feature branches", each implementing a technology on top of the clean master branch.  This provides you with an example on how to integrate said technologies, or use the branches to merge in a configuration that meets your requirements.  See the [`Feature Branches`](/internal/docs/FEATURE_BRANCHES.md) documentation for more.
 
 ## Getting started
+
+```bash
+git clone https://github.com/ctrlplusb/react-universally my-project
+cd my-project
+yarn
+yarn run develop
+```
+
+Or, if you aren't using [`yarn`](https://yarnpkg.com/):
 
 ```bash
 git clone https://github.com/ctrlplusb/react-universally my-project

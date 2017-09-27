@@ -27,4 +27,8 @@ __Step 5: Deploy to "now"__
 
     npm run deploy
 
+Or, if you aren't using [`yarn`](https://yarnpkg.com/):
+
+    npm run deploy
+
 That's it.  Your clipboard will contain the address of the deployed app. Open your browser, paste, go.  These guys are seriously awesome hosts. [Check them out.](https://zeit.co/now)

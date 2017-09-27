@@ -5,6 +5,7 @@ import nodeExternals from 'webpack-node-externals';
 import path from 'path';
 import webpack from 'webpack';
 import WebpackMd5Hash from 'webpack-md5-hash';
+import fs from 'fs';
 
 import { happyPackPlugin } from '../utils';
 import { ifElse } from '../../shared/utils/logic';
@@ -163,6 +164,7 @@ export default function webpackConfigFactory(buildOptions) {
     ),
 
     resolve: {
+      // modulesDirectories: ['node_modules'],
       // These extensions are tried when resolving a file.
       extensions: config('bundleSrcTypes').map(ext => `.${ext}`),
 
@@ -199,7 +201,25 @@ export default function webpackConfigFactory(buildOptions) {
       ),
     ]),
 
+    devServer: ifDevClient({
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      },
+      port: config('clientDevServerPort'),
+      https: {
+        key: fs.readFileSync('./private/keys/localhost.key'),
+        cert: fs.readFileSync('./private/keys/localhost.crt'),
+        passphrase: 'thepublisher',
+      },
+    }),
     plugins: removeNil([
+      ifClient(
+        () =>
+          new webpack.ProvidePlugin({
+            $: 'jquery',
+            jQuery: 'jquery',
+          }),
+      ),
       // This grants us source map support, which combined with our webpack
       // source maps will give us nice stack traces for our node executed
       // bundles.
@@ -360,15 +380,17 @@ export default function webpackConfigFactory(buildOptions) {
                 presets: [
                   // JSX
                   'react',
+                  'es2015',
                   // Stage 3 javascript syntax.
                   // "Candidate: complete spec and initial browser implementations."
                   // Add anything lower than stage 3 at your own risk. :)
+                  'stage-2',
                   'stage-3',
                   // For our client bundles we transpile all the latest ratified
                   // ES201X code into ES5, safe for browsers.  We exclude module
                   // transilation as webpack takes care of this for us, doing
                   // tree shaking in the process.
-                  ifClient(['env', { es2015: { modules: false } }]),
+                  // ifClient(['env', { es2015: { modules: true } }]),
                   // For a node bundle we use the specific target against
                   // babel-preset-env so that only the unsupported features of
                   // our target node version gets transpiled.
@@ -384,6 +406,8 @@ export default function webpackConfigFactory(buildOptions) {
                   // Adding this will give us the path to our components in the
                   // react dev tools.
                   ifDev('transform-react-jsx-source'),
+
+                  ifProd('transform-react-remove-prop-types'),
                   // Replaces the React.createElement function with one that is
                   // more optimized for production.
                   // NOTE: Symbol needs to be polyfilled. Ensure this feature
@@ -410,24 +434,27 @@ export default function webpackConfigFactory(buildOptions) {
           loaders: [
             'classnames-loader',
             'style-loader',
-            {
-              path: 'css-loader',
-              // Include sourcemaps for dev experience++.
-              query: {
-                sourceMap: true,
-                modules: true,
-                importLoaders: 1,
-                localIdentName,
-              },
-            },
-            { path: 'postcss-loader' },
-            {
-              path: 'sass-loader',
-              options: {
-                outputStyle: 'expanded',
-                sourceMap: true,
-              },
-            },
+            'css-loader',
+            'postcss-loader',
+            'sass-loader',
+            // {
+            //   path: 'css-loader',
+            //   // Include sourcemaps for dev experience++.
+            //   query: {
+            //     sourceMap: true,
+            //     modules: true,
+            //     importLoaders: 1,
+            //     localIdentName,
+            //   },
+            // },
+            // { path: 'postcss-loader' },
+            // {
+            //   path: 'sass-loader',
+            //   options: {
+            //     outputStyle: 'expanded',
+            //     sourceMap: true,
+            //   },
+            // },
           ],
         }),
       ),
@@ -476,11 +503,7 @@ export default function webpackConfigFactory(buildOptions) {
                 'classnames-loader',
                 ...ExtractTextPlugin.extract({
                   fallback: 'style-loader',
-                  use: [
-                    `css-loader?modules=1&importLoaders=1&localIdentName=${localIdentName}`,
-                    'postcss-loader',
-                    'sass-loader?outputStyle=expanded',
-                  ],
+                  use: ['css-loader', 'postcss-loader', 'sass-loader'],
                 }),
               ],
             })),
@@ -498,16 +521,16 @@ export default function webpackConfigFactory(buildOptions) {
         ),
 
         // Dont CSS modules on css files from node_modules folder
-        ifElse(isClient || isServer)({
-          test: /node_modules.*\.css$/,
-          use: ifProdClient(
-            ExtractTextPlugin.extract({
-              fallback: 'style-loader',
-              use: ['css-loader', 'postcss-loader'],
-            }),
-            [...ifNode(['css-loader/locals'], ['style-loader', 'css-loader']), 'postcss-loader'],
-          ),
-        }),
+        // ifElse(isClient || isServer)({
+        //   test: /node_modules.*\.css$/,
+        //   use: ifProdClient(
+        //     ExtractTextPlugin.extract({
+        //       fallback: 'style-loader',
+        //       use: ['css-loader', 'postcss-loader'],
+        //     }),
+        //     [...ifNode(['css-loader/locals'], ['style-loader', 'css-loader']), 'postcss-loader'],
+        //   ),
+        // }),
 
         // ASSETS (Images/Fonts/etc)
         // This is bound to our server/client bundles as we only expect to be
